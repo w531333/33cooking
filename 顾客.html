@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh"> <!-- 设置页面的语言为中文 -->
+<head>
+    <meta charset="UTF-8"> <!-- 设置字符编码为 UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 设置视口的初始宽度和缩放比例 -->
+    <link rel="stylesheet" href="顾客.css"> <!-- 引入外部CSS文件，负责页面的样式 -->
+    <title>菜品点单系统</title> <!-- 设置页面标题 -->
+</head>
+<body>
+    
+    <!-- 页面头部区域，包含标题 -->
+    <div class="header"> <!-- 页面主标题 -->
+        <div class="header">
+            <h1>菜品点单系统</h1>
+            <div class="user-nav">
+                <span id="username-display"></span>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面主体区域，包含菜品列表 -->
+    <div class="container">
+        <div class="dish-list" id="dish-list"></div> <!-- 用于展示菜品的列表 -->
+    </div>
+
+    <!-- 页面底部的浮动按钮区域 -->
+    <div class="floating-buttons">
+        <!-- 购物车按钮，点击时会调用cartManager.openCart()方法 -->
+        <button class="cart-btn" onclick="cartManager.openCart()">购物车 (<span id="cart-count">0</span>)</button>
+        <!-- 订单按钮，点击时会调用orderManager.openOrders()方法 -->
+        <button class="order-btn" onclick="orderManager.openOrders()">订单</button>
+    </div>
+
+    <!-- 购物车浮窗 -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <!-- 购物车头部 -->
+            <div class="modal-header">
+                <h2>购物车</h2> <!-- 购物车标题 -->
+                <span class="close" onclick="cartManager.closeCart()">&times;</span> <!-- 关闭购物车按钮 -->
+            </div>
+            <div id="cart-items" class="cart-items"></div> <!-- 展示购物车中的菜品项 -->
+            <div class="cart-footer">
+                <div class="cart-summary">总价: ¥ <span id="cart-total">0.00</span></div> <!-- 显示购物车总价 -->
+                <button class="confirm-btn" onclick="orderManager.submitOrder()">确认订单</button> <!-- 提交订单按钮 -->
+                <div id="order-details"></div> <!-- 用于展示订单详细信息 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单浮窗 -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <!-- 订单浮窗头部 -->
+            <div class="modal-header">
+                <h2>历史订单</h2> <!-- 订单标题 -->
+                <span class="close" onclick="orderManager.closeOrders()">&times;</span> <!-- 关闭订单浮窗按钮 -->
+            </div>
+            <div id="order-details-container" class="order-details-container"></div> <!-- 展示历史订单内容 -->
+        </div>
+    </div>
+
+    <script>
+        // ↓↓↓ 新增退出函数 ↓↓↓
+        function logout() {
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
+        }
+
+        // ↓↓↓ 在页面加载时显示用户名 ↓↓↓
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = localStorage.getItem('username') || '用户';
+            document.getElementById('username-display').textContent = `欢迎，${username}`;
+        });
+
+
+    // 配置对象：包含API基础路径和日期格式化选项
+    const CONFIG = {
+        API_BASE_URL: 'http://127.0.0.1:5000/api', // 后端API的基础URL
+        DATE_FORMAT_OPTIONS: { // 日期格式选项
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            weekday: 'long',
+            timeZone: 'Asia/Shanghai'
+        }
+    };
+
+    // 工具对象：包含一些通用的辅助函数
+    const utils = {
+        // 格式化价格为两位小数
+        formatPrice: (price) => parseFloat(price).toFixed(2),
+        
+        // 格式化日期为指定格式
+        formatDate: (dateString) => {
+            const date = new Date(dateString);
+            return isNaN(date) ? dateString : date.toLocaleString('zh-CN', CONFIG.DATE_FORMAT_OPTIONS);
+        },
+
+        // 获取当前用户的ID，首先从localStorage中获取，如果没有则抛出错误
+        getUserId: () => {
+            const userId = localStorage.getItem('user_id');
+            if (!userId) {
+                throw new Error('请先登录！');
+            }
+            return userId;
+        },
+
+        // 请求API的通用函数，返回JSON格式的数据
+        async fetchAPI(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/${endpoint}`, options);
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message || '操作失败');
+                }
+                return data;
+            } catch (error) {
+                console.error('API请求失败:', error);
+                throw error;
+            }
+        }
+    };
+
+    // 菜单管理对象：负责加载和展示菜单菜品
+    const menuManager = {
+        // 加载菜单
+        async loadMenu() {
+            try {
+                const data = await utils.fetchAPI('dishes');
+                const dishes = Array.isArray(data) ? data : data.dishes;
+                
+                const dishList = document.getElementById("dish-list");
+                // 将菜品列表转换为HTML并插入到页面
+                dishList.innerHTML = dishes.map(dish => this.createDishCard(dish)).join('');
+            } catch (error) {
+                alert('加载菜品失败: ' + error.message);
+            }
+        },
+
+        // 创建菜品的HTML卡片
+        createDishCard(dish) {
+            return `
+                <div class="dish-card" data-id="${dish.id}">
+                    <img src="${dish.image_url}" alt="${dish.name}"> <!-- 菜品图片 -->
+                    <h3>${dish.name}</h3> <!-- 菜品名称 -->
+                    <p>价格：¥${utils.formatPrice(dish.price)}</p> <!-- 菜品价格 -->
+                    <input type="text" placeholder="备注 (选填)" class="remark-input"> <!-- 输入备注的框 -->
+                    <button onclick="cartManager.addDishToCart(${dish.id}, '${dish.name}', ${dish.price}, '${dish.image_url}')">
+                        添加到购物车
+                    </button> <!-- 添加到购物车按钮 -->
+                </div>
+            `;
+        }
+    };
+
+    // 购物车管理对象：负责管理购物车中的菜品
+    const cartManager = {
+        // 向购物车添加菜品
+        async addDishToCart(id, name, price, image) {
+            try {
+                const userId = utils.getUserId();
+                const remarkInput = document.querySelector(`[data-id="${id}"] .remark-input`);
+                const remark = remarkInput.value.trim();
+
+                await utils.fetchAPI('cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, dish_id: id, quantity: 1, remark })
+                });
+
+                // 成功添加后清空备注输入框
+                remarkInput.value = '';
+                
+                alert(`${name} 已成功添加到您的购物车`);
+                this.updateCart();
+            } catch (error) {
+                alert('添加失败: ' + error.message);
+            }
+        },
+
+        // 更新购物车中的数量
+        async updateCart() {
+            try {
+                const userId = utils.getUserId();
+                const data = await utils.fetchAPI(`cart/view?user_id=${userId}`);
+                const cartCount = data.cart_items.reduce((sum, item) => sum + item.quantity, 0);
+                document.getElementById("cart-count").textContent = cartCount;
+            } catch (error) {
+                document.getElementById("cart-count").textContent = "0";
+            }
+        },
+
+        // 打开购物车界面
+        async openCart() {
+            try {
+                const userId = utils.getUserId();
+                const data = await utils.fetchAPI(`cart/view?user_id=${userId}`);
+                
+                const cartItems = document.getElementById("cart-items");
+                let totalPrice = 0;
+
+                cartItems.innerHTML = data.cart_items.map(item => {
+                    totalPrice += item.price * item.quantity;
+                    return this.createCartItemHTML(item);
+                }).join('');
+
+                document.getElementById("cart-total").textContent = utils.formatPrice(totalPrice);
+                document.getElementById("cart-modal").style.display = "block";
+            } catch (error) {
+                alert('打开购物车失败: ' + error.message);
+            }
+        },
+
+        // 创建购物车项的HTML
+        createCartItemHTML(item) {
+            return `
+                <div class="cart-item">
+                    <img src="${item.image_url}" alt="${item.name}">
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        <p>¥${utils.formatPrice(item.price)} × ${item.quantity}</p>
+                        <p>备注: ${item.remark || "无"}</p>
+                    </div>
+                    <button class="delete-btn" onclick='cartManager.removeDishFromCart(${item.dish_id}, ${JSON.stringify(item.remark || "")})'">
+                        删除
+                    </button>
+                </div>
+            `;
+        },
+
+        // 从购物车中删除菜品
+        async removeDishFromCart(dishId, remark) {
+            try {
+                const userId = utils.getUserId();
+                await utils.fetchAPI('cart/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, dish_id: dishId, remark: remark || "" })
+                });
+
+                alert('删除成功！');
+                this.openCart();
+                this.updateCart();
+            } catch (error) {
+                alert('删除失败: ' + error.message);
+            }
+        },
+
+        // 关闭购物车浮窗
+        closeCart() {
+            document.getElementById("cart-modal").style.display = "none";
+        }
+    };
+
+    // 订单管理对象：负责处理订单相关操作
+    const orderManager = {
+        // 提交订单
+        async submitOrder() {
+            try {
+                const userId = utils.getUserId();
+                await utils.fetchAPI('submit_order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                alert('订单提交成功！');
+                cartManager.openCart();
+                cartManager.updateCart();
+            } catch (error) {
+                alert('订单提交失败: ' + error.message);
+            }
+        },
+
+        // 打开历史订单页面
+        async openOrders() {
+            try {
+                const userId = utils.getUserId();
+                const data = await utils.fetchAPI(`orders?user_id=${userId}`);
+                
+                const orderContainer = document.getElementById("order-details-container");
+                orderContainer.innerHTML = data.orders.map(order => this.createOrderHTML(order)).join('');
+                
+                document.getElementById("order-modal").style.display = "block";
+            } catch (error) {
+                alert('加载订单失败: ' + error.message);
+            }
+        },
+
+        // 创建订单的HTML显示
+        createOrderHTML(order) {
+            const itemsHTML = order.items.map(item => 
+                `<p>${item.name} - ¥${utils.formatPrice(item.price)} × ${item.quantity} (备注: ${item.remark || '无'})</p>`
+            ).join('');
+
+            return `
+                <div class="order-item">
+                    <p><strong>下单时间：</strong> ${utils.formatDate(order.created_at)}</p>
+                    ${itemsHTML}
+                </div>
+            `;
+        },
+
+        // 关闭订单浮窗
+        closeOrders() {
+            document.getElementById("order-modal").style.display = "none";
+        }
+    };
+
+
+    // 页面加载时初始化菜单和购物车
+    window.onload = () => {
+        menuManager.loadMenu();
+        cartManager.updateCart();
+    };
+
+    </script>
+</body>
+</html>

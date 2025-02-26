@@ -1,0 +1,91 @@
+/* 全局样式 */
+body {
+    font-family: Arial, sans-serif; /* 设置页面字体 */
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); /* 设置背景渐变色 */
+    margin: 0;
+    padding: 0;
+    height: 100vh; /* 设置页面高度为100vh，确保背景覆盖整个页面 */
+    display: flex;
+    justify-content: center; /* 垂直居中 */
+    align-items: center; /* 水平居中 */
+  }
+
+  /* 表单容器样式 */
+  .form-container {
+    width: 100%;
+    max-width: 400px; /* 最大宽度限制 */
+    background-color: #fff; /* 背景颜色为白色 */
+    padding: 30px;
+    border-radius: 10px; /* 圆角效果 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 为容器添加阴影 */
+  }
+
+  h2 {
+    text-align: center; /* 标题居中 */
+    margin-bottom: 20px;
+    color: #333; /* 设置标题颜色 */
+  }
+
+  /* 表单字段样式 */
+  label {
+    display: block; /* 每个标签占一行 */
+    margin-top: 10px;
+    font-weight: bold; /* 字体加粗 */
+    color: #555; /* 标签颜色 */
+  }
+
+  input {
+    width: 100%; /* 输入框宽度100% */
+    padding: 12px; /* 输入框内边距 */
+    margin-top: 8px;
+    border: 2px solid #ddd; /* 设置输入框边框颜色 */
+    border-radius: 5px; /* 输入框圆角 */
+    font-size: 14px;
+    box-sizing: border-box; /* 包括padding和border在内的总宽度 */
+  }
+
+  input:focus {
+    border-color: #007bff; /* 输入框获取焦点时，边框颜色变化 */
+    outline: none; /* 去除默认的焦点轮廓 */
+  }
+
+  /* 按钮样式 */
+  button {
+    width: 100%; /* 按钮宽度100% */
+    padding: 12px; /* 按钮内边距 */
+    margin-top: 20px;
+    background-color: #007bff; /* 按钮背景颜色 */
+    color: #fff; /* 按钮文字颜色 */
+    border: none; /* 无边框 */
+    border-radius: 5px; /* 按钮圆角 */
+    cursor: pointer; /* 鼠标悬浮时显示手型光标 */
+    font-size: 16px;
+  }
+
+  button:hover {
+    background-color: #0056b3; /* 鼠标悬浮时，按钮颜色变深 */
+  }
+
+  /* 返回登录按钮样式 */
+  .back-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background-color: #28a745; /* 返回按钮绿色背景 */
+    color: #fff; /* 按钮文字颜色 */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .back-button:hover {
+    background-color: #218838; /* 鼠标悬浮时，按钮颜色变深 */
+  }
+
+  /* 错误提示样式 */
+  #registerMessage {
+    color: red; /* 错误信息字体颜色 */
+    text-align: center; /* 错误信息居中 */
+    margin-top: 10px;
+  }

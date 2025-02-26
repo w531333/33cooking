@@ -1,0 +1,296 @@
+body { 
+    font-family: Arial, sans-serif; 
+    background-color: #eef2f7; 
+    margin: 0; 
+    padding: 0; 
+    color: #333; 
+  }
+  .header { 
+    background-color: #0056b3; 
+    color: #fff; 
+    text-align: center; 
+    padding: 20px; 
+    font-size: 26px; 
+    font-weight: bold; 
+    border-bottom: 5px solid #003d80; 
+  }
+  .container { 
+    max-width: 1200px; 
+    margin: 20px auto; 
+    padding: 20px; 
+  }
+  .dish-list { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+    gap: 20px; 
+  }
+  .dish-card { 
+    background: #fff; 
+    border-radius: 12px; 
+    box-shadow: 0 6px 10px rgba(0,0,0,0.1); 
+    padding: 15px; 
+    text-align: center; 
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+  }
+  .dish-card:hover { 
+    transform: scale(1.08); 
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+  }
+  .dish-card img { 
+    width: 100%; 
+    height: 170px; 
+    object-fit: cover; 
+    border-radius: 10px; 
+  }
+  .dish-card h3 { 
+    margin: 12px 0 6px; 
+    font-size: 22px; 
+    color: #333; 
+  }
+  .dish-card p { 
+    margin: 6px 0; 
+    font-size: 18px; 
+    color: #555; 
+    font-weight: bold; 
+  }
+  .dish-card input { 
+    width: 100%; 
+    padding: 8px; 
+    margin-top: 10px; 
+    border-radius: 6px; 
+    border: 1px solid #ccc; 
+  }
+  .dish-card button { 
+    margin-top: 10px; 
+    background-color: #28a745; 
+    color: #fff; 
+    border: none; 
+    padding: 10px 16px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    transition: background 0.3s ease; 
+  }
+  .dish-card button:hover { 
+    background-color: #218838; 
+  }
+  
+  .modal { 
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.5); 
+  }
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 90%;
+    height: 70%;
+    max-width: 650px;
+    border-radius: 12px;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    max-height: 90vh; /* 限制整体高度 */
+  }
+  .modal-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+  }
+  .close { 
+    font-size: 28px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    color: #888; 
+  }
+  .close:hover { 
+    color: #000; 
+  }
+  
+  /* 单个购物车项，不再限制高度 */
+  .cart-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-right: 10px;
+  }
+  
+  /* 将所有购物车项的容器设置为滚动区域 */
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(90vh - 150px);
+    padding-right: 10px;
+  }
+  
+  /* 如果不希望 footer 固定在底部，则移除 sticky */
+  .cart-footer { 
+    background: white; 
+    padding-top: 10px; 
+    text-align: right; 
+  }
+  .cart-summary { 
+    font-size: 20px; 
+    font-weight: bold; 
+    color: #333; 
+  }
+  .confirm-btn { 
+    background-color: #007bff; 
+    color: #fff; 
+    padding: 12px 22px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 18px; 
+    transition: background 0.3s ease; 
+  }
+  .confirm-btn:hover { 
+    background-color: #0056b3; 
+  }
+  .cart-item img {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    object-fit: cover;
+  }
+  .item-info {
+    flex: 1;
+    margin-left: 10px;
+  }
+  .cart-item button.delete-btn {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .cart-item button.delete-btn:hover {
+    background-color: #c82333;
+  }
+  
+  @media (max-width: 600px) {
+    .modal-content {
+      padding: 15px;
+      max-height: 90vh;
+    }
+    .cart-items {
+      max-height: calc(90vh - 120px);
+    }
+  }
+  
+  /* ----------------------- 新增部分 ----------------------- */
+  /* 新增：浮动按钮容器，固定在页面右下角，竖直排列，并添加滑入动画 */
+  .floating-buttons {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column; /* 竖直排列 */
+    gap: 10px; /* 按钮之间的间距 */
+    z-index: 1100;
+    animation: slideIn 0.5s ease-out;
+  }
+  
+  /* 修改后的购物车按钮（移除原有固定定位） */
+  .cart-btn {
+    background-color: #ffc107;
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border: none;
+  }
+  
+  .cart-btn:hover {
+    background-color: #e0a800;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  }
+  
+  /* 修改后的订单按钮 */
+  .order-btn {
+    background-color: #17a2b8;
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border: none;
+  }
+  
+  .order-btn:hover {
+    background-color: #138496;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+  }
+  
+  /* 滑入动画定义 */
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  /* 订单浮窗内订单列表样式 */
+  .order-details-container {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(90vh - 150px);
+    padding-right: 10px;
+  }
+  
+  /* 单个订单项样式 */
+  .order-item {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  .order-item p {
+    margin: 5px 0;
+  }
+  
+
+  /*退出登录*/
+  /* 新增顶部导航栏样式 */
+.user-nav {
+  position: fixed;
+  top: 0;
+  right: 20px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  z-index: 2000;
+}
+
+.logout-btn {
+  background-color: #f6f6f6d5;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+}

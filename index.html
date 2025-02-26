@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="登录.css">
+  <title>登录界面</title>
+</head>
+
+<body>
+  <div class="login-container">
+    <h2>登录</h2>
+    <form id="loginForm">
+      <label for="username">账号：</label>
+      <input type="text" id="username" name="username" required placeholder="请输入账号">
+
+      <label for="password">密码：</label>
+      <input type="password" id="password" name="password" required placeholder="请输入密码">
+
+      <button type="submit">登录</button>
+
+      <p>
+        还没有账号？ <a href="register.html">注册</a>
+      </p>
+    </form>
+    <p id="message"></p> <!-- 错误提示 -->
+  </div>
+
+  <script>
+    // 显示消息的函数，显示错误或成功信息
+    function showMessage(msg, isError = true) {
+        const messageElement = document.getElementById("message");
+        messageElement.innerText = msg;  // 设置消息内容
+        messageElement.style.display = "block"; // 显示消息
+        messageElement.style.color = isError ? "red" : "green"; // 错误为红色，成功为绿色
+
+        // 延时3秒后隐藏消息并恢复按钮状态
+        setTimeout(() => {
+            messageElement.style.display = "none";  // 隐藏消息
+            const button = document.querySelector("button");
+            button.removeAttribute("disabled");  // 恢复按钮
+            button.style.opacity = "1";  // 恢复按钮透明度
+            button.innerText = "登录";  // 恢复按钮文字
+        }, 3000); // 3秒后恢复
+    }
+
+    // 监听登录表单的提交事件
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        event.preventDefault();  // 阻止默认表单提交行为
+
+        // 获取用户输入的账号和密码
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const messageElement = document.getElementById("message");
+        const button = document.querySelector("button");
+
+        // 如果账号或密码为空，显示错误信息
+        if (!username || !password) {
+            showMessage("❌ 请输入账号和密码");
+            return;
+        }
+
+        // 禁用按钮，防止重复提交
+        button.setAttribute("disabled", "true");
+        button.style.opacity = "0.6";  // 按钮变灰
+        button.innerText = "登录中...";  // 改变按钮文本，提示正在登录
+
+        try {
+            // 发送登录请求到后端API
+            const response = await fetch("http://127.0.0.1:5000/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),  // 将用户名和密码发送给服务器
+                credentials: "include"  // 向服务器发送cookie（如果有）
+            });
+
+            // 解析返回的JSON数据
+            const data = await response.json();
+
+            // 如果登录成功，进行后续操作
+            // if (data.success) {
+            //     try {
+            //         localStorage.setItem("user_id", data.user_id);  // 将用户ID存储在本地
+            //     } catch (e) {
+            //         console.warn("本地存储失败:", e);  // 捕获本地存储的错误
+            //     }
+            //     showMessage("✅ 登录成功，正在跳转...", false);  // 显示成功信息
+            //     window.location.href = data.role === "admin" ? "管理员3.html" : "顾客.html";  // 跳转到相应的页面
+            // } 
+            if (data.success) {
+                try {
+                    localStorage.setItem("user_id", data.user_id);
+                    localStorage.setItem("username", data.username); // 新增存储用户名
+                } catch (e) {
+                    console.warn("本地存储失败:", e);
+                }
+                showMessage("✅ 登录成功，正在跳转...", false);
+                window.location.href = data.role === "admin" ? "管理员3.html" : "顾客.html";
+            }
+            else {
+                // 如果登录失败，显示失败消息
+                showMessage("❌ " + data.message);
+            }
+        } catch (error) {
+            // 如果请求失败（例如网络问题），显示错误消息
+            console.error("登录失败:", error);
+            showMessage("❌ 服务器无法连接，请检查网络"); 
+        } finally {
+            // 重新启用按钮
+            button.removeAttribute("disabled");
+            button.style.opacity = "1";  // 恢复按钮透明度
+            button.innerText = "登录";  // 恢复按钮文本
+        }
+    });
+
+  </script>
+</body>
+</html>

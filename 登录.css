@@ -1,0 +1,97 @@
+/* 全局样式 */
+body {
+  font-family: Arial, sans-serif; /* 设置页面字体为Arial，后备为sans-serif */
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); /* 背景采用渐变色从紫色到蓝色 */
+  margin: 0; /* 去除页面默认的边距 */
+  padding: 0; /* 去除页面默认的内边距 */
+  height: 100vh; /* 页面高度设置为100%视口高度 */
+  display: flex; /* 使用Flexbox布局 */
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+}
+
+/* 登录容器样式 */
+.login-container {
+  width: 100%; /* 容器宽度为100% */
+  max-width: 400px; /* 容器最大宽度为400px，避免太宽 */
+  background-color: #fff; /* 背景颜色为白色 */
+  padding: 30px; /* 内边距设置为30px，确保内容不贴边 */
+  border-radius: 10px; /* 设置圆角效果，使容器边缘圆滑 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影效果，使容器浮起 */
+}
+
+/* 标题样式 */
+h2 {
+  text-align: center; /* 标题居中对齐 */
+  margin-bottom: 20px; /* 标题下方增加20px的间距 */
+  color: #333; /* 设置标题颜色为深灰色 */
+}
+
+/* 表单字段样式 */
+label {
+  display: block; /* 每个标签独占一行 */
+  margin-top: 10px; /* 上边距为10px，避免标签与输入框太近 */
+  font-weight: bold; /* 标签字体加粗，增加可读性 */
+  color: #555; /* 标签颜色为浅灰色 */
+}
+
+/* 输入框样式 */
+input {
+  width: 100%; /* 输入框宽度为100%，充满父容器 */
+  padding: 12px; /* 内边距设置为12px，增加输入框的可点击区域 */
+  margin-top: 8px; /* 输入框上边距8px，确保与标签有间距 */
+  border: 2px solid #ddd; /* 输入框边框为2px的灰色 */
+  border-radius: 5px; /* 输入框圆角效果 */
+  font-size: 14px; /* 设置字体大小为14px */
+  box-sizing: border-box; /* 确保padding和border包含在总宽度内 */
+}
+
+/* 输入框获取焦点时的样式 */
+input:focus {
+  border-color: #007bff; /* 获取焦点时，边框颜色变为蓝色 */
+  outline: none; /* 去除默认的输入框聚焦时的外轮廓 */
+}
+
+/* 按钮样式 */
+button {
+  width: 100%; /* 按钮宽度为100%，充满父容器 */
+  padding: 12px; /* 内边距12px，使按钮更大，便于点击 */
+  margin-top: 20px; /* 上边距20px，确保按钮与输入框之间有间距 */
+  background-color: #007bff; /* 按钮背景色为蓝色 */
+  color: #fff; /* 按钮文字颜色为白色 */
+  border: none; /* 去除按钮的默认边框 */
+  border-radius: 5px; /* 按钮圆角效果 */
+  cursor: pointer; /* 鼠标悬停时显示为可点击手型 */
+  font-size: 16px; /* 按钮文字大小为16px */
+}
+
+/* 按钮悬停时的样式 */
+button:hover {
+  background-color: #0056b3; /* 鼠标悬停时按钮背景色变为深蓝色 */
+}
+
+/* 注册链接的样式 */
+p {
+  text-align: center; /* 文本居中 */
+  margin-top: 20px; /* 上边距20px，确保与按钮有间距 */
+  color: #777; /* 设置文本颜色为灰色 */
+}
+
+/* 链接样式 */
+a {
+  color: #007bff; /* 链接文字颜色为蓝色 */
+  text-decoration: none; /* 去除链接的下划线 */
+  font-weight: bold; /* 链接文字加粗 */
+}
+
+/* 链接悬停时的样式 */
+a:hover {
+  text-decoration: underline; /* 鼠标悬停时，链接出现下划线 */
+}
+
+/* 错误提示样式 */
+#message {
+  color: red; /* 错误信息文字颜色为红色 */
+  text-align: center; /* 错误信息居中显示 */
+  margin-top: 10px; /* 错误信息上边距10px，避免与按钮太近 */
+}

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理员管理系统</title>
+  <style>
+    :root {
+      --primary-color: #0056b3;
+      --secondary-color: #17a2b8;
+      --background-color: #eef2f7;
+      --text-color: #333;
+      --border-radius: 12px;
+      --shadow: 0 6px 10px rgba(0,0,0,0.1);
+      --danger-color: #dc3545;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body { 
+      font-family: Arial, sans-serif; 
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+
+    .header { 
+      background-color: var(--primary-color);
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      border-bottom: 5px solid #003d80;
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .container { 
+      max-width: 1200px; 
+      margin: 20px auto; 
+      padding: 20px; 
+    }
+
+    .dish-form { 
+      background: #fff; 
+      padding: 20px; 
+      margin-bottom: 20px; 
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .dish-form input { 
+      width: 100%; 
+      padding: 10px; 
+      margin: 10px 0; 
+      border: 1px solid #ccc; 
+      border-radius: 6px; 
+    }
+
+    .button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background: var(--primary-color);
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .button.danger {
+      background: var(--danger-color);
+    }
+
+    .floating-buttons {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1100;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .order-btn {
+      background-color: var(--secondary-color);
+      padding: 14px 22px;
+      border-radius: 50px;
+      font-size: 18px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      width: 90%;
+      max-width: 650px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      max-height: 90vh;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .close {
+      font-size: 28px;
+      cursor: pointer;
+      color: #888;
+      transition: color 0.3s;
+    }
+
+    .close:hover {
+      color: #000;
+    }
+
+    .order-details-container {
+      overflow-y: auto;
+      max-height: calc(90vh - 150px);
+      padding-right: 10px;
+    }
+
+    .order-item {
+      border-bottom: 1px solid #ddd;
+      padding: 15px 10px;
+      margin-bottom: 10px;
+    }
+
+    .order-item p {
+      margin: 8px 0;
+    }
+
+    /* 新增菜品列表样式 */
+    .dish-list {
+      background: #fff;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .dish-list-title {
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+
+    .dish-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .dish-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .dish-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .dish-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .dish-info {
+      padding: 15px;
+    }
+
+    .dish-name {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .dish-price {
+      color: var(--primary-color);
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .delete-btn {
+      width: 100%;
+      padding: 8px;
+      background: var(--danger-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ↓↓↓ 新增导航栏样式 ↓↓↓ */
+.user-nav {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 2000;
+}
+
+#username-display {
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.logout-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+/* ↑↑↑ 新增样式结束 ↑↑↑ */
+  </style>
+</head>
+<body>
+  <!-- ↓↓↓ 新增顶部导航栏 ↓↓↓ -->
+  <div class="user-nav">
+    <span id="username-display"></span>
+    <button class="logout-btn" onclick="logout()">退出登录</button>
+  </div>
+  <!-- ↑↑↑ 新增代码结束 ↑↑↑ -->
+
+  <div class="header">
+    <h1>管理员管理系统</h1>
+  </div>
+  
+  <div class="container">
+    <div class="dish-form">
+      <h2>添加新菜品</h2>
+      <input type="text" id="dish-name" placeholder="菜品名称">
+      <input type="file" id="dish-image" accept="image/*">
+      <input type="number" id="dish-price" placeholder="价格" min="0" step="0.01">
+      <button class="button" id="add-dish-btn">添加菜品</button>
+    </div>
+
+    <!-- 新增菜品列表区域 -->
+    <div class="dish-list">
+      <h2 class="dish-list-title">菜品列表</h2>
+      <div id="dish-grid" class="dish-grid">
+        <!-- 菜品卡片将通过 JavaScript 动态添加 -->
+      </div>
+    </div>
+  </div>
+  
+  <div class="floating-buttons">
+    <button class="button order-btn" id="view-orders-btn">查看用户订单</button>
+  </div>
+  
+  <div id="orders-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>用户订单</h2>
+        <span class="close" id="close-modal">&times;</span>
+      </div>
+      <div id="order-details-container" class="order-details-container"></div>
+    </div>
+  </div>
+
+  <script>
+    // ↓↓↓ 新增退出函数 ↓↓↓
+    function logout() {
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('username');
+        window.location.href = 'index.html';
+    }
+
+    // ↓↓↓ 在页面加载时显示用户名 ↓↓↓
+    document.addEventListener('DOMContentLoaded', function() {
+        const username = localStorage.getItem('username') || '管理员';
+        document.getElementById('username-display').textContent = `欢迎，${username}`;
+    });
+
+
+    class DishManager {
+      constructor() {
+        this.API_BASE_URL = 'http://127.0.0.1:5000/api';
+        this.initializeEventListeners();
+        this.loadDishes(); // 页面加载时获取菜品列表
+      }
+
+      initializeEventListeners() {
+        document.getElementById('add-dish-btn').addEventListener('click', () => this.addNewDish());
+        document.getElementById('view-orders-btn').addEventListener('click', () => this.openOrders());
+        document.getElementById('close-modal').addEventListener('click', () => this.closeOrders());
+      }
+
+      async loadDishes() {
+        try {
+          const response = await this.sendRequest('/dishes', 'GET');
+          if (response.success) {
+            this.renderDishes(response.dishes);
+          } else {
+            alert("加载菜品失败：" + response.message);
+          }
+        } catch (error) {
+          console.error("加载菜品错误:", error);
+          alert("加载菜品失败，请检查网络连接");
+        }
+      }
+
+      async deleteDish(dishId) {
+        if (!confirm("确定要删除这个菜品吗？")) {
+          return;
+        }
+
+        try {
+          const response = await this.sendRequest(`/dishes/${dishId}`, 'DELETE');
+          if (response.success) {
+            alert("菜品删除成功！");
+            await this.loadDishes(); // 重新加载菜品列表
+          } else {
+            alert("删除失败：" + response.message);
+          }
+        } catch (error) {
+          console.error("删除菜品错误:", error);
+          alert("删除菜品失败，请检查网络连接");
+        }
+      }
+
+      renderDishes(dishes) {
+        const grid = document.getElementById('dish-grid');
+        grid.innerHTML = dishes.map(dish => `
+          <div class="dish-card">
+            <img src="${dish.image_url}" alt="${dish.name}" class="dish-image">
+            <div class="dish-info">
+              <h3 class="dish-name">${dish.name}</h3>
+              <p class="dish-price">¥${parseFloat(dish.price).toFixed(2)}</p>
+              <button class="delete-btn" onclick="dishManager.deleteDish('${dish.id}')">删除菜品</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      async addNewDish() {
+        const nameInput = document.getElementById('dish-name');
+        const priceInput = document.getElementById('dish-price');
+        const imageInput = document.getElementById('dish-image');
+
+        const name = nameInput.value.trim();
+        const price = priceInput.value.trim();
+        const file = imageInput.files[0];
+
+        if (!this.validateDishInput(name, price, file)) {
+          return;
+        }
+
+        try {
+          const formData = new FormData();
+          formData.append("name", name);
+          formData.append("price", parseFloat(price));
+          formData.append("image", file);
+
+          const response = await this.sendRequest('/dishes/add', 'POST', formData);
+          
+          if (response.success) {
+            alert("菜品添加成功！");
+            this.clearDishForm(nameInput, priceInput, imageInput);
+            await this.loadDishes(); // 重新加载菜品列表
+          } else {
+            alert("添加失败：" + response.message);
+          }
+        } catch (error) {
+          console.error("添加菜品错误:", error);
+          alert("添加菜品失败，请检查网络连接");
+        }
+      }
+
+      validateDishInput(name, price, file) {
+        if (!name || !price || !file) {
+          alert("请填写所有字段并选择图片");
+          return false;
+        }
+        if (isNaN(price) || parseFloat(price) <= 0) {
+          alert("请输入有效的价格");
+          return false;
+        }
+        return true;
+      }
+
+      clearDishForm(...inputs) {
+        inputs.forEach(input => input.value = '');
+      }
+
+      async openOrders() {
+        try {
+          const response = await this.sendRequest('/orders/admin', 'GET');
+          
+          if (response.success) {
+            this.renderOrders(response.orders);
+          } else {
+            this.showError("加载订单失败：" + response.message);
+          }
+          
+          document.getElementById("orders-modal").style.display = "block";
+        } catch (error) {
+          console.error("加载订单失败：", error);
+          alert("加载订单失败！");
+        }
+      }
+
+      closeOrders() {
+        document.getElementById("orders-modal").style.display = "none";
+      }
+
+      renderOrders(orders) {
+        const container = document.getElementById("order-details-container");
+        container.innerHTML = orders.map(order => this.createOrderHTML(order)).join('');
+      }
+
+      createOrderHTML(order) {
+        const itemsHTML = order.items.map(item => `
+          <p>
+            ${item.name} - ¥${parseFloat(item.price).toFixed(2)} × ${item.quantity}
+            <strong style="color: #d9534f;">备注:</strong> ${item.remark || "无"}
+          </p>
+        `).join('');
+
+        return `
+          <div class="order-item">
+            <p><strong>订单编号:</strong> ${order.order_id}</p>
+            <p><strong>用户:</strong> ${order.username}</p>
+            <div>${itemsHTML}</div>
+            <p><strong>下单时间:</strong> ${this.formatDate(order.created_at)}</p>
+            <p><strong>总价:</strong> ¥${order.total}</p>
+          </div>
+        `;
+      }
+
+      formatDate(dateString) {
+        return new Date(dateString).toLocaleString("zh-CN", {
+          timeZone: "Asia/Shanghai"
+        });
+      }
+
+      async sendRequest(endpoint, method, body = null) {
+        const options = {
+          method,
+          headers: {}
+        };
+
+        if (body && !(body instanceof FormData)) {
+          options.headers['Content-Type'] = 'application/json';
+          options.body = JSON.stringify(body);
+        } else if (body) {
+          options.body = body;
+        }
+
+        const response = await fetch(`${this.API_BASE_URL}${endpoint}`, options);
+        return await response.json();
+      }
+
+      showError(message) {
+        const container = document.getElementById("order-details-container");
+        container.innerHTML = `<p class="error">${message}</p>`;
+      }
+    }
+
+    // 初始化应用
+    let dishManager;
+    document.addEventListener('DOMContentLoaded', () => {
+      dishManager = new DishManager();
+    });
+  </script>
+</body>
+</html>
